@@ -15,14 +15,13 @@
 		var canvas = document.getElementById("canvas");
 		var ctx = canvas.getContext("2d");
 
-		document.addEventListener("keydown", keyDownHandler, false);
-		/* document.addEventListener("keyup", keyUpHandler, false); */
-
 		var rightPressed = false;
 		var leftPressed = false;
 		var upPressed = false;
 		var downPressed = false;
 		var spacePressed = false;
+
+		document.addEventListener("keydown", keyDownHandler, false);
 
 		function keyDownHandler(e) {
 			if (e.keyCode == 39) {
@@ -94,7 +93,6 @@
 						pieceSize);
 				}
 				ctx.fill();
-				//ctx.stroke();
 				ctx.closePath();
 			}
 			this.colliding = function () {
@@ -110,7 +108,6 @@
 		var pieceSize = 20;
 		var t = 0;
 		var p;
-		var gameOver = false;
 
 		for (var y = -5; y < 21; y++) {
 			field[y] = new Array();
@@ -142,9 +139,12 @@
 				}
 				if (!full) continue;
 				numCleared++;
-				for (var Y = y; Y > 0; Y--) {
+				for (var Y = y; Y > -5; Y--) {
 					field[Y] = field[Y - 1];
 				}
+				field[-5] = new Array();
+				field[-5][-1] = '#afafaf';
+				field[-5][10] = '#afafaf';
 				y++;
 			}
 
@@ -163,8 +163,8 @@
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			p.draw();
 
-			for (var i = 0; i < 20; i++) {
-				for (var j = 0; j < 10; j++) {
+			for (var i = -5; i < 21; i++) {
+				for (var j = -1; j < 11; j++) {
 					if (field[i][j] == null) continue;
 					ctx.beginPath();
 					ctx.fillStyle = field[i][j];
@@ -193,16 +193,6 @@
 
 		function draw() {
 			if (t == 0) p = new Piece(Math.floor(Math.random() * 7));
-			if (gameOver) return;
-
-			/* Check for overflow. */
-			for (var i = 0; i < 4; i++) {
-				if (p.y + p.b[i * 2 + 1] < 0) {
-					debugger;
-					gameOver = true;
-					return;
-				}
-			}
 
 			t++;
 			if (t % 25 == 0) p.y++;
