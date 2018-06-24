@@ -67,7 +67,7 @@
 			this.y = 0;
 			this.type = type;
 			this.rotateRight = function () {
-				if (this.type == 2) { return; }
+				if (this.type == 2) return;
 				for (var i = 0; i < 4; i++) {
 					var temp = this.b[i * 2 + 1];
 					this.b[i * 2 + 1] = this.b[i * 2];
@@ -75,7 +75,7 @@
 				}
 			}
 			this.rotateLeft = function () {
-				if (this.type == 2) { return; }
+				if (this.type == 2) return;
 				for (var i = 0; i < 4; i++) {
 					var temp = this.b[i * 2 + 1];
 					this.b[i * 2 + 1] = -this.b[i * 2];
@@ -99,9 +99,7 @@
 				for (var i = 0; i < 4; i++) {
 					var x = p.x + p.b[i * 2];
 					var y = p.y + p.b[i * 2 + 1];
-					if (field[y][x] != null) {
-						return true;
-					}
+					if (field[y][x] != null) return true;
 				}
 				return false;
 			}
@@ -175,19 +173,19 @@
 				return;
 			}
 
-			if (leftPressed) { p.x--; }
+			if (leftPressed) p.x--;
 			if (p.colliding()) p.x++;
-			if (rightPressed) { p.x++; }
+			if (rightPressed) p.x++;
 			if (p.colliding()) p.x--;
 
-			if (upPressed) { p.rotateRight(); }
+			if (upPressed) p.rotateRight();
 			if (p.colliding()) {
 				p.rotateRight();
 				p.rotateRight();
 				p.rotateRight();
 			}
 
-			if (downPressed) { p.rotateLeft(); }
+			if (downPressed) p.rotateLeft();
 			if (p.colliding()) {
 				p.rotateRight();
 				p.rotateRight();
@@ -204,7 +202,7 @@
 
 			for (var i = 0; i < 20; i++) {
 				for (var j = 0; j < 10; j++) {
-					if (field[i][j] == null) { continue; }
+					if (field[i][j] == null) continue;
 					ctx.beginPath();
 					ctx.fillStyle = field[i][j];
 					ctx.rect((19 + j) * pieceSize,
