@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>tetr.js</title>
+		<style>
+		* { padding: 0; margin: 0; }
+		canvas { background: #eee; display: block; margin: 0 auto; }
+		</style>
+	</head>
+	<body>
+		<canvas id="canvas" width="960" height="640"></canvas>
+
+		<script>
+		var canvas = document.getElementById("canvas");
+		var ctx = canvas.getContext("2d");
+
+		document.addEventListener("keydown", keyDownHandler, false);
+		/* document.addEventListener("keyup", keyUpHandler, false); */
+
+		var rightPressed = false;
+		var leftPressed = false;
+		var upPressed = false;
+
+		function keyDownHandler(e) {
+			if (e.keyCode == 39) {
+				rightPressed = true;
+			} else if (e.keyCode == 37) {
+				leftPressed = true;
+			} else if (e.keyCode == 38) {
+				upPressed = true;
+			}
+		}
+
+		var shapes = [
+			[0, 0, -1, 0, 1, 0, 0, 1], // T piece
+			[0, 0, 0, -1, 0, 1, 1, 1], // L piece
+			[0, 0, 1, 0, 0, 1, 1, 1], // O piece
+			[0, 0, 0, -1, 0, 1, -1, 1], // J piece
+			[0, 0, 0, -1, 0, 1, 0, 2], // I piece
+		];
+
+		var cols = [
+			"#0095DD",
+			"#0095DD",
+			"#0095DD",
+			"#0095DD",
+			"#0095DD"
+		]
+
+		function Piece (type) {
+			this.b = shapes[type];
+			this.col = cols[type];
+			this.x = 0;
+			this.y = 0;
+			this.type = type;
+			this.rotateRight = function () {
+				if (this.type == 2) { return; }
+				for (var i = 0; i < 4; i++) {
+					var temp = this.b[i * 2 + 1];
+					this.b[i * 2 + 1] = this.b[i * 2];
+					this.b[i * 2] = -temp;
+				}
+			}
+			this.draw = function () {
+				ctx.beginPath();
+				ctx.fillStyle = this.col;
+				for (var i = 0; i < 4; i++) {
+					ctx.rect((this.x + this.b[i * 2] + 23) * pieceSize,
+						(this.y + this.b[i * 2 + 1] + 7) * pieceSize,
+						pieceSize,
+						pieceSize);
+				}
+				ctx.fill();
+				ctx.closePath();
+			}
+		}
+
+		var pieceSize = 20;
+		var t = 0;
+
+		var p;
+
+		function draw() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			t++;
+
+			if (t == 1) {
+				p = new Piece(Math.floor(Math.random() * 5));
+			}
+
+			if (t % 50 == 0) {
+				p.y++;
+			}
+
+			if (leftPressed) { p.x--; }
+			if (rightPressed) { p.x++; }
+			if (upPressed) { p.rotateRight(); }
+			leftPressed = rightPressed = upPressed = false;
+
+			/* Rendering code */
+
+			p.draw();
+
+			ctx.beginPath();
+			ctx.rect(19 * pieceSize,
+				6 * pieceSize,
+				10 * pieceSize,
+				20 * pieceSize);
+			ctx.stroke();
+			ctx.closePath();
+		}
+
+		setInterval(draw, 10);
+		</script>
+	</body>
+</html>
