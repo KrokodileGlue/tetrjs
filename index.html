@@ -64,7 +64,7 @@
 			this.b = shapes[type];
 			this.col = cols[type];
 			this.x = 4;
-			this.y = 0;
+			this.y = 1;
 			this.type = type;
 			this.rotateRight = function () {
 				if (this.type == 2) return;
@@ -108,6 +108,7 @@
 		var pieceSize = 20;
 		var t = 0;
 		var p;
+		var gameOver = false;
 
 		for (var y = -5; y < 20; y++) {
 			field[y] = new Array();
@@ -146,9 +147,47 @@
 			}
 		}
 
+		function render() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			p.draw();
+
+			for (var i = 0; i < 20; i++) {
+				for (var j = 0; j < 10; j++) {
+					if (field[i][j] == null) continue;
+					ctx.beginPath();
+					ctx.fillStyle = field[i][j];
+					ctx.rect((19 + j) * pieceSize,
+						(i + 6) * pieceSize,
+						pieceSize,
+						pieceSize);
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
+
+			ctx.beginPath();
+			ctx.rect(19 * pieceSize,
+				6 * pieceSize,
+				10 * pieceSize,
+				20 * pieceSize);
+			ctx.stroke();
+			ctx.closePath();
+		}
+
 		function draw() {
+			if (t == 0) p = new Piece(Math.floor(Math.random() * 7));
+			if (gameOver) return;
+
+			/* Check for overflow. */
+			for (var i = 0; i < 4; i++) {
+				if (p.y + p.b[i * 2 + 1] < 0) {
+					debugger;
+					gameOver = true;
+					return;
+				}
+			}
+
 			t++;
-			if (t == 1) p = new Piece(Math.floor(Math.random() * 7));
 			if (t % 25 == 0) p.y++;
 
 			/* Check for collisions with the field. */
@@ -160,6 +199,7 @@
 					p.y--;
 					collision();
 					t = 0;
+					render();
 					return;
 				}
 			}
@@ -169,6 +209,7 @@
 				spacePressed = false;
 				p.y--;
 				collision();
+				render();
 				t = 0;
 				return;
 			}
@@ -195,32 +236,7 @@
 			leftPressed = rightPressed = upPressed
 			= downPressed = spacePressed = false;
 
-			/* Rendering code */
-
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			p.draw();
-
-			for (var i = 0; i < 20; i++) {
-				for (var j = 0; j < 10; j++) {
-					if (field[i][j] == null) continue;
-					ctx.beginPath();
-					ctx.fillStyle = field[i][j];
-					ctx.rect((19 + j) * pieceSize,
-						(i + 6) * pieceSize,
-						pieceSize,
-						pieceSize);
-					ctx.fill();
-					ctx.closePath();
-				}
-			}
-
-			ctx.beginPath();
-			ctx.rect(19 * pieceSize,
-				6 * pieceSize,
-				10 * pieceSize,
-				20 * pieceSize);
-			ctx.stroke();
-			ctx.closePath();
+			render();
 		}
 
 		setInterval(draw, 10);
