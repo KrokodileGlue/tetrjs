@@ -10,7 +10,7 @@ var pPressed = false;
 
 document.addEventListener("keydown", keyDownHandler, false);
 
-function keyDownHandler(e) {
+function keyDownHandler (e) {
     if (e.keyCode == 39) {
 	rightPressed = true;
     } else if (e.keyCode == 37) {
@@ -78,12 +78,7 @@ function Piece (type) {
 	}
     }
     this.rotateLeft = function () {
-	if (this.type == 2) return;
-	for (var i = 0; i < 4; i++) {
-	    var temp = this.b[i * 2 + 1];
-	    this.b[i * 2 + 1] = -this.b[i * 2];
-	    this.b[i * 2] = temp;
-	}
+	for (var i = 0; i < 3; i++) this.rotateRight();
     }
     this.draw = function () {
 	ctx.beginPath();
@@ -207,7 +202,7 @@ function render() {
 	ctx.fillText("Paused", 30 * pieceSize, 25.5 * pieceSize);
 }
 
-function draw() {
+function draw () {
     if (t == 0 && !gameOver) {
 	console.log("hue");
 	p = new Piece(nextPiece);
@@ -253,24 +248,14 @@ function draw() {
 	return;
     }
 
-    if (leftPressed) p.x--;
+    if (leftPressed)   p.x--;
     if (p.colliding()) p.x++;
-    if (rightPressed) p.x++;
+    if (rightPressed)  p.x++;
     if (p.colliding()) p.x--;
-
-    if (upPressed) p.rotateRight();
-    if (p.colliding()) {
-	p.rotateRight();
-	p.rotateRight();
-	p.rotateRight();
-    }
-
-    if (downPressed) p.rotateLeft();
-    if (p.colliding()) {
-	p.rotateRight();
-	p.rotateRight();
-	p.rotateRight();
-    }
+    if (upPressed)     p.rotateRight();
+    if (p.colliding()) p.rotateLeft();
+    if (downPressed)   p.rotateLeft();
+    if (p.colliding()) p.rotateLeft();
 
     leftPressed = rightPressed = upPressed
 	= downPressed = spacePressed = false;
