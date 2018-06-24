@@ -41,6 +41,7 @@
 		var score = 0;
 		var level = 0;
 		var lines = 0;
+		var gameOver = false;
 
 		var levels = [
 			53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9,
@@ -68,7 +69,7 @@
 		]
 
 		function Piece (type) {
-			this.b = shapes[type];
+			this.b = shapes[type].slice();
 			this.col = cols[type];
 			this.x = 4;
 			this.y = 1;
@@ -114,6 +115,7 @@
 		var pieceSize = 20;
 		var t = 0;
 		var p;
+		var nextPiece = Math.floor(Math.random() * 7);
 
 		for (var y = -5; y < 21; y++) {
 			field[y] = new Array();
@@ -175,6 +177,7 @@
 		function render() {
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			p.draw();
+			preview.draw();
 
 			for (var i = 0; i < 20; i++) {
 				for (var j = 0; j < 10; j++) {
@@ -203,10 +206,22 @@
 			ctx.fillText("Score: " + score.toLocaleString(), 30 * pieceSize, 7 * pieceSize);
 			ctx.fillText("Level: " + level, 30 * pieceSize, 9 * pieceSize);
 			ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
+			if (gameOver)
+				ctx.fillText("Game over!", 30 * pieceSize, 18 * pieceSize);
 		}
 
 		function draw() {
-			if (t == 0) p = new Piece(Math.floor(Math.random() * 7));
+			if (t == 0) {
+				p = new Piece(nextPiece);
+				nextPiece = Math.floor(Math.random() * 7);
+				preview = new Piece(nextPiece);
+				preview.x = 14;
+				preview.y = 7.5;
+			}
+
+			if (gameOver) return;
+
+			if (p.colliding()) gameOver = true;
 
 			t++;
 			if (t % levels[level] == 0) p.y++;
@@ -260,7 +275,7 @@
 			render();
 		}
 
-		setInterval(draw, 17);
+		setInterval(draw, 16);
 		</script>
 	</body>
 </html>
