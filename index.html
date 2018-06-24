@@ -26,6 +26,7 @@
 		var upPressed = false;
 		var downPressed = false;
 		var spacePressed = false;
+		var pPressed = false;
 
 		document.addEventListener("keydown", keyDownHandler, false);
 
@@ -40,18 +41,22 @@
 				downPressed = true;
 			} else if (e.keyCode == 32) {
 				spacePressed = true;
+			} else if (e.keyCode == 80) {
+				pPressed = true;
 			}
 
 			// Prevent arrow keys from scrolling around.
-			if (rightPressed || leftPressed || upPressed || downPressed)
-				e.preventDefault();
+				if (rightPressed || leftPressed || upPressed || downPressed)
+					e.preventDefault();
 		}
 
 		var field = new Array();
 		var score = 0;
 		var level = 0;
 		var lines = 0;
+
 		var gameOver = false;
+		var paused = false;
 
 		var levels = [
 			53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9,
@@ -218,10 +223,13 @@
 			ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
 			if (gameOver)
 				ctx.fillText("Game over!", 30 * pieceSize, 18 * pieceSize);
+			if (paused)
+				ctx.fillText("Paused", 30 * pieceSize, 25.5 * pieceSize);
 		}
 
 		function draw() {
-			if (t == 0) {
+			if (t == 0 && !gameOver) {
+				console.log("hue");
 				p = new Piece(nextPiece);
 				nextPiece = Math.floor(Math.random() * 7);
 				preview = new Piece(nextPiece);
@@ -229,8 +237,13 @@
 				preview.y = 7.5;
 			}
 
-			if (gameOver) return;
-
+			if (pPressed) paused = !paused, pPressed = false;
+			if (gameOver || paused) {
+				leftPressed = rightPressed = upPressed
+				= downPressed = spacePressed = false;
+				render();
+				return;
+			}
 			if (p.colliding()) gameOver = true;
 
 			t++;
