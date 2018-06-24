@@ -100,7 +100,7 @@
 		var t = 0;
 		var p;
 
-		for (var y = 0; y < 20; y++) {
+		for (var y = -2; y < 20; y++) {
 			field[y] = new Array();
 			field[y][-1] = '#afafaf';
 			field[y][10] = '#afafaf';
@@ -110,6 +110,31 @@
 
 		for (var i = 0; i < 10; i++) {
 			field[20][i] = '#afafaf';
+		}
+
+		function collision() {
+			/* Put the piece into the field. */
+			for (var i = 0; i < 4; i++) {
+				var x = p.x + p.b[i * 2];
+				var y = p.y + p.b[i * 2 + 1];
+				field[y][x] = p.col;
+			}
+
+			/* Check for full lines. */
+			for (var y = 19; y >= 0; y--) {
+				var full = true;
+				for (var x = 0; x < 10; x++) {
+					if (field[y][x] == null) {
+						full = false;
+						break;
+					}
+				}
+				if (!full) continue;
+				for (var Y = y; Y > 0; Y--) {
+					field[Y] = field[Y - 1];
+				}
+				y++;
+			}
 		}
 
 		function draw() {
@@ -127,13 +152,12 @@
 
 			/* Check for collisions with the field. */
 			for (var i = 0; i < 4; i++) {
-				if (field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] != null) {
+				var x = p.x + p.b[i * 2];
+				var y = p.y + p.b[i * 2 + 1];
+
+				if (field[y][x] != null) {
 					p.y--;
-					for (var j = 0; j < 4; j++) {
-						var x = p.x + p.b[j * 2];
-						var y = p.y + p.b[j * 2 + 1];
-						field[y][x] = p.col;
-					}
+					collision();
 					t = 0;
 					return;
 				}
