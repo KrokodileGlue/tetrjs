@@ -5,11 +5,17 @@
 		<title>tetr.js</title>
 		<style>
 		* { padding: 0; margin: 0; }
-		canvas { background: #eee; display: block; margin: 0 auto; }
+		body { background-color: #eee; }
+		canvas {
+			background: #eee;
+			display: block;
+			margin: 0 auto;
+			border-width: 5px;
+		}
 		</style>
 	</head>
 	<body>
-		<canvas id="canvas" width="960" height="640"></canvas>
+		<center><canvas id="canvas" width="960" height="640"></canvas></center>
 
 		<script>
 		var canvas = document.getElementById("canvas");
@@ -35,6 +41,10 @@
 			} else if (e.keyCode == 32) {
 				spacePressed = true;
 			}
+
+			// Prevent arrow keys from scrolling around.
+			if (rightPressed || leftPressed || upPressed || downPressed)
+				e.preventDefault();
 		}
 
 		var field = new Array();
