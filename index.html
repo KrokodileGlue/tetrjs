@@ -21,6 +21,7 @@
 		var rightPressed = false;
 		var leftPressed = false;
 		var upPressed = false;
+		var downPressed = false;
 
 		function keyDownHandler(e) {
 			if (e.keyCode == 39) {
@@ -29,8 +30,12 @@
 				leftPressed = true;
 			} else if (e.keyCode == 38) {
 				upPressed = true;
+			} else if (e.keyCode == 40) {
+				downPressed = true;
 			}
 		}
+
+		var field = new Array();
 
 		var shapes = [
 			[0, 0, -1, 0, 1, 0, 0, 1], // T piece
@@ -38,20 +43,24 @@
 			[0, 0, 1, 0, 0, 1, 1, 1], // O piece
 			[0, 0, 0, -1, 0, 1, -1, 1], // J piece
 			[0, 0, 0, -1, 0, 1, 0, 2], // I piece
+			[0, 0, 1, 0, 0, 1, -1, 1], // S piece
+			[0, 0, -1, 0, 0, 1, 1, 1], // Z piece
 		];
 
 		var cols = [
 			"#0095DD",
-			"#0095DD",
-			"#0095DD",
-			"#0095DD",
-			"#0095DD"
+			"#1df99a",
+			"#ffe502",
+			"#ff011b",
+			"#97ff30",
+			"#a500ff",
+			"#ff006e",
 		]
 
 		function Piece (type) {
 			this.b = shapes[type];
 			this.col = cols[type];
-			this.x = 0;
+			this.x = 4;
 			this.y = 0;
 			this.type = type;
 			this.rotateRight = function () {
@@ -66,41 +75,100 @@
 				ctx.beginPath();
 				ctx.fillStyle = this.col;
 				for (var i = 0; i < 4; i++) {
-					ctx.rect((this.x + this.b[i * 2] + 23) * pieceSize,
-						(this.y + this.b[i * 2 + 1] + 7) * pieceSize,
+					ctx.rect((this.x + this.b[i * 2] + 19) * pieceSize,
+						(this.y + this.b[i * 2 + 1] + 6) * pieceSize,
 						pieceSize,
 						pieceSize);
 				}
 				ctx.fill();
+				//ctx.stroke();
 				ctx.closePath();
+			}
+			this.incorrect = function () {
+				for (var i = 0; i < 4; i++) {
+					var x = p.x + p.b[i * 2];
+					var y = p.y + p.b[i * 2 + 1];
+					if (field[y][x] != null) {
+						return true;
+					}
+				}
+				return false;
 			}
 		}
 
 		var pieceSize = 20;
 		var t = 0;
-
 		var p;
 
+		for (var y = 0; y < 20; y++) {
+			field[y] = new Array();
+			field[y][-1] = '#afafaf';
+			field[y][10] = '#afafaf';
+		}
+
+		field[20] = new Array();
+
+		for (var i = 0; i < 10; i++) {
+			field[20][i] = '#afafaf';
+		}
+
 		function draw() {
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			t++;
 
 			if (t == 1) {
-				p = new Piece(Math.floor(Math.random() * 5));
+				p = new Piece(Math.floor(Math.random() * 7));
 			}
 
-			if (t % 50 == 0) {
+			if (downPressed) p.y++;
+
+			if (t % 25 == 0) {
 				p.y++;
 			}
 
+			/* Check for collisions with the field. */
+			for (var i = 0; i < 4; i++) {
+				if (field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] != null) {
+					p.y--;
+					for (var j = 0; j < 4; j++) {
+						var x = p.x + p.b[j * 2];
+						var y = p.y + p.b[j * 2 + 1];
+						field[y][x] = p.col;
+					}
+					t = 0;
+					return;
+				}
+			}
+
 			if (leftPressed) { p.x--; }
+			if (p.incorrect()) p.x++;
 			if (rightPressed) { p.x++; }
+			if (p.incorrect()) p.x--;
 			if (upPressed) { p.rotateRight(); }
-			leftPressed = rightPressed = upPressed = false;
+			if (p.incorrect()) {
+				p.rotateRight();
+				p.rotateRight();
+				p.rotateRight();
+			}
+			leftPressed = rightPressed = upPressed = downPressed = false;
 
 			/* Rendering code */
 
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			p.draw();
+
+			for (var i = 0; i < 20; i++) {
+				for (var j = 0; j < 10; j++) {
+					if (field[i][j] == null) { continue; }
+					ctx.beginPath();
+					ctx.fillStyle = field[i][j];
+					ctx.rect((19 + j) * pieceSize,
+						(i + 6) * pieceSize,
+						pieceSize,
+						pieceSize);
+					ctx.fill();
+					ctx.closePath();
+				}
+			}
 
 			ctx.beginPath();
 			ctx.rect(19 * pieceSize,
