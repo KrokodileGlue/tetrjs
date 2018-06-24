@@ -40,6 +40,12 @@
 		var field = new Array();
 		var score = 0;
 		var level = 0;
+		var lines = 0;
+
+		var levels = [
+			53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9,
+			8, 7, 6, 6, 5, 5, 4, 4, 3
+		];
 
 		var shapes = [
 			[0, 0, -1, 0, 1, 0, 0, 1], // T piece
@@ -157,6 +163,13 @@
 			} else if (numCleared == 4) {
 				score += 1200 * (level + 1);
 			}
+
+			if (lines % 10 > (lines + numCleared) % 10) {
+				level++;
+				if (level >= 20) level = 20;
+			}
+
+			lines += numCleared;
 		}
 
 		function render() {
@@ -189,13 +202,14 @@
 			ctx.font = "30px Consolas";
 			ctx.fillText("Score: " + score, 30 * pieceSize, 7 * pieceSize);
 			ctx.fillText("Level: " + level, 30 * pieceSize, 9 * pieceSize);
+			ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
 		}
 
 		function draw() {
 			if (t == 0) p = new Piece(Math.floor(Math.random() * 7));
 
 			t++;
-			if (t % 25 == 0) p.y++;
+			if (t % levels[level] == 0) p.y++;
 
 			/* Check for collisions with the field. */
 			for (var i = 0; i < 4; i++) {
@@ -246,7 +260,7 @@
 			render();
 		}
 
-		setInterval(draw, 10);
+		setInterval(draw, 17);
 		</script>
 	</body>
 </html>
