@@ -22,6 +22,7 @@
 		var leftPressed = false;
 		var upPressed = false;
 		var downPressed = false;
+		var spacePressed = false;
 
 		function keyDownHandler(e) {
 			if (e.keyCode == 39) {
@@ -32,6 +33,8 @@
 				upPressed = true;
 			} else if (e.keyCode == 40) {
 				downPressed = true;
+			} else if (e.keyCode == 32) {
+				spacePressed = true;
 			}
 		}
 
@@ -84,7 +87,7 @@
 				//ctx.stroke();
 				ctx.closePath();
 			}
-			this.incorrect = function () {
+			this.colliding = function () {
 				for (var i = 0; i < 4; i++) {
 					var x = p.x + p.b[i * 2];
 					var y = p.y + p.b[i * 2 + 1];
@@ -100,7 +103,7 @@
 		var t = 0;
 		var p;
 
-		for (var y = -2; y < 20; y++) {
+		for (var y = -5; y < 20; y++) {
 			field[y] = new Array();
 			field[y][-1] = '#afafaf';
 			field[y][10] = '#afafaf';
@@ -139,16 +142,9 @@
 
 		function draw() {
 			t++;
-
-			if (t == 1) {
-				p = new Piece(Math.floor(Math.random() * 7));
-			}
-
+			if (t == 1) p = new Piece(Math.floor(Math.random() * 7));
 			if (downPressed) p.y++;
-
-			if (t % 25 == 0) {
-				p.y++;
-			}
+			if (t % 25 == 0) p.y++;
 
 			/* Check for collisions with the field. */
 			for (var i = 0; i < 4; i++) {
@@ -163,17 +159,28 @@
 				}
 			}
 
+			if (spacePressed) {
+				while (!p.colliding()) p.y++;
+				spacePressed = false;
+				p.y--;
+				collision();
+				t = 0;
+				return;
+			}
+
 			if (leftPressed) { p.x--; }
-			if (p.incorrect()) p.x++;
+			if (p.colliding()) p.x++;
 			if (rightPressed) { p.x++; }
-			if (p.incorrect()) p.x--;
+			if (p.colliding()) p.x--;
 			if (upPressed) { p.rotateRight(); }
-			if (p.incorrect()) {
+			if (p.colliding()) {
 				p.rotateRight();
 				p.rotateRight();
 				p.rotateRight();
 			}
-			leftPressed = rightPressed = upPressed = downPressed = false;
+
+			leftPressed = rightPressed = upPressed
+			= downPressed = spacePressed = false;
 
 			/* Rendering code */
 
