@@ -110,7 +110,7 @@ function render() {
     ctx.closePath();
 
     ctx.fillStyle = "#000000";
-    ctx.font = "30px Consolas";
+    ctx.font = "30px Lekton";
     ctx.fillText("Score: " + score.toLocaleString(), 30 * pieceSize, 7 * pieceSize);
     ctx.fillText("Level: " + level, 30 * pieceSize, 9 * pieceSize);
     ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
