@@ -56,6 +56,7 @@ function Piece (type) {
 }
 
 function init () {
+    score = level = lines = 0;
     field = [];
     for (var y = -5; y < 21; y++)
 	field[y] = [], field[y][-1] = '#afafaf', field[y][10] = '#afafaf';
