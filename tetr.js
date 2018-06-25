@@ -2,49 +2,33 @@ var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 document.addEventListener("keydown", keyDownHandler, false);
 
-var RIGHT = 39;
-var LEFT = 37;
-var UP = 38;
-var DOWN = 40;
-var SPACE = 32;
-var P = 80;
-
+var RIGHT = 39, LEFT = 37, UP = 38, DOWN = 40, SPACE = 32, P = 80;
 var keyDowns = [];
+
+var field = [], score = 0, level = 0, lines = 0;
+var gameOver = false, paused = false;
+
+var levels = [53, 49, 45, 41, 37, 33, 28, 22, 17,
+	      11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3];
 
 function keyDownHandler (e) {
     keyDowns.push(e.keyCode);
-    /* Prevent arrow keys from scrolling around. */
     if (e.keyCode == UP || e.keyCode == DOWN
 	|| e.keyCode == LEFT || e.keyCode == RIGHT)
 	e.preventDefault();
 }
 
-var field = [], score = 0, level = 0, lines = 0;
-var gameOver = false, paused = false;
-
-var levels = [
-    53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9,
-    8, 7, 6, 6, 5, 5, 4, 4, 3
-];
-
-var shapes = [
-    [0, 0, -1, 0, 1, 0, 0, 1], // T piece
-    [0, 0, 0, -1, 0, 1, 1, 1], // L piece
-    [0, 0, 1, 0, 0, 1, 1, 1], // O piece
-    [0, 0, 0, -1, 0, 1, -1, 1], // J piece
-    [0, 0, 0, -1, 0, 1, 0, 2], // I piece
-    [0, 0, 1, 0, 0, 1, -1, 1], // S piece
-    [0, 0, -1, 0, 0, 1, 1, 1], // Z piece
-];
-
-var cols = [
-    "#0095DD", "#1df99a", "#ffe502", "#ff011b", "#97ff30", "#a500ff",
-    "#ff006e",
-]
-
 function Piece (type) {
-    this.b = shapes[type].slice();
-    this.col = cols[type];
+    this.b = [[0, 0, -1, 0, 1, 0, 0, 1],  // T piece
+	      [0, 0, 0, -1, 0, 1, 1, 1],  // L piece
+	      [0, 0, 1, 0, 0, 1, 1, 1],   // O piece
+	      [0, 0, 0, -1, 0, 1, -1, 1], // J piece
+	      [0, 0, 0, -1, 0, 1, 0, 2],  // I piece
+	      [0, 0, 1, 0, 0, 1, -1, 1],  // S piece
+	      [0, 0, -1, 0, 0, 1, 1, 1]   // Z piece
+	     ][type].slice();
+    this.col = ["#0095DD", "#1df99a", "#ffe502", "#ff011b",
+		"#97ff30", "#a500ff", "#ff006e"][type];
     this.x = 4;
     this.y = 1;
     this.type = type;
@@ -72,35 +56,23 @@ function Piece (type) {
 	ctx.closePath();
     }
     this.colliding = function () {
-	for (var i = 0; i < 4; i++) {
-	    var x = p.x + p.b[i * 2];
-	    var y = p.y + p.b[i * 2 + 1];
-	    if (field[y][x] != null) return true;
-	}
-	return false;
+	for (var i = 0; i < 4; i++)
+	    if (field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] != null)
+		return true;
     }
 }
 
-var pieceSize = 20, t = 0,
-    p = null, nextPiece = Math.floor(Math.random() * 7);
-
-for (var y = -5; y < 21; y++) {
-    field[y] = new Array();
-    field[y][-1] = '#afafaf';
-    field[y][10] = '#afafaf';
-}
-
+var pieceSize = 20, t = 0;
+var p = null, nextPiece = Math.floor(Math.random() * 7);
+for (var y = -5; y < 21; y++)
+    field[y] = [], field[y][-1] = '#afafaf', field[y][10] = '#afafaf';
 for (var i = 0; i < 10; i++)
     field[20][i] = '#afafaf';
 
 function collision() {
-    /* Put the piece into the field. */
+    var numCleared = 0;
     for (var i = 0; i < 4; i++)
 	field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] = p.col;
-
-    var numCleared = 0;
-
-    /* Check for full lines. */
     for (var y = 19; y >= 0; y--) {
 	var full = true;
 	for (var x = 0; x < 10; x++)
@@ -109,9 +81,7 @@ function collision() {
 	for (var Y = y; Y > -5; Y--) {
 	    field[Y] = field[Y - 1];
 	}
-	field[-5] = [];
-	field[-5][-1] = '#afafaf';
-	field[-5][10] = '#afafaf';
+	field[-5] = [], field[-5][-1] = '#afafaf', field[-5][10] = '#afafaf';
 	numCleared++, y++;
     }
 
@@ -159,10 +129,8 @@ function render() {
     ctx.fillText("Score: " + score.toLocaleString(), 30 * pieceSize, 7 * pieceSize);
     ctx.fillText("Level: " + level, 30 * pieceSize, 9 * pieceSize);
     ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
-    if (gameOver)
-	ctx.fillText("Game over!", 30 * pieceSize, 18 * pieceSize);
-    if (paused)
-	ctx.fillText("Paused", 30 * pieceSize, 25.5 * pieceSize);
+    if (gameOver) ctx.fillText("Game over!", 30 * pieceSize, 18 * pieceSize);
+    if (paused)   ctx.fillText("Paused", 30 * pieceSize, 25.5 * pieceSize);
 }
 
 function draw () {
@@ -170,18 +138,13 @@ function draw () {
 	p = new Piece(nextPiece);
 	nextPiece = Math.floor(Math.random() * 7);
 	preview = new Piece(nextPiece);
-	preview.x = 14;
-	preview.y = 7.5;
+	preview.x = 14, preview.y = 7.5;
     }
-
     if (keyDowns.includes(P)) paused = !paused;
     if (gameOver || paused) return keyDowns = [], render();
     if (p.colliding()) gameOver = true;
-
     t++;
     if (t % levels[level] == 0) p.y++;
-
-    /* Check for collisions with the field. */
     for (var i = 0; i < 4; i++) {
 	if (field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] != null) {
 	    p.y--, t = 0;
@@ -189,21 +152,17 @@ function draw () {
 	    return;
 	}
     }
-
-    /* Hard drop. */
     if (keyDowns.includes(SPACE)) {
 	while (!p.colliding()) p.y++;
 	p.y--, t = 0, keyDowns = [];
 	collision(), render();
 	return;
     }
-
     if (keyDowns.includes(LEFT))  p.x--;           if (p.colliding()) p.x++;
     if (keyDowns.includes(RIGHT)) p.x++;           if (p.colliding()) p.x--;
     if (keyDowns.includes(UP))    p.rotateRight(); if (p.colliding()) p.rotateLeft();
-    if (keyDowns.includes(DOWN))  p.rotateLeft();  if (p.colliding()) p.rotateLeft();
-
+    if (keyDowns.includes(DOWN))  p.rotateLeft();  if (p.colliding()) p.rotateRight();
     keyDowns = [], render();
 }
 
-setInterval(draw, 16);
+setInterval(draw, 16); /* About 60 times a second. */
