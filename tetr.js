@@ -1,42 +1,26 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
-
-var rightPressed = false;
-var leftPressed = false;
-var upPressed = false;
-var downPressed = false;
-var spacePressed = false;
-var pPressed = false;
-
 document.addEventListener("keydown", keyDownHandler, false);
 
-function keyDownHandler (e) {
-    if (e.keyCode == 39) {
-	rightPressed = true;
-    } else if (e.keyCode == 37) {
-	leftPressed = true;
-    } else if (e.keyCode == 38) {
-	upPressed = true;
-    } else if (e.keyCode == 40) {
-	downPressed = true;
-    } else if (e.keyCode == 32) {
-	spacePressed = true;
-    } else if (e.keyCode == 80) {
-	pPressed = true;
-    }
+var RIGHT = 39;
+var LEFT = 37;
+var UP = 38;
+var DOWN = 40;
+var SPACE = 32;
+var P = 80;
 
-    // Prevent arrow keys from scrolling around.
-    if (rightPressed || leftPressed || upPressed || downPressed)
+var keyDowns = [];
+
+function keyDownHandler (e) {
+    keyDowns.push(e.keyCode);
+    /* Prevent arrow keys from scrolling around. */
+    if (e.keyCode == UP || e.keyCode == DOWN
+	|| e.keyCode == LEFT || e.keyCode == RIGHT)
 	e.preventDefault();
 }
 
-var field = new Array();
-var score = 0;
-var level = 0;
-var lines = 0;
-
-var gameOver = false;
-var paused = false;
+var field = [], score = 0, level = 0, lines = 0;
+var gameOver = false, paused = false;
 
 var levels = [
     53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9,
@@ -54,12 +38,7 @@ var shapes = [
 ];
 
 var cols = [
-    "#0095DD",
-    "#1df99a",
-    "#ffe502",
-    "#ff011b",
-    "#97ff30",
-    "#a500ff",
+    "#0095DD", "#1df99a", "#ffe502", "#ff011b", "#97ff30", "#a500ff",
     "#ff006e",
 ]
 
@@ -102,10 +81,8 @@ function Piece (type) {
     }
 }
 
-var pieceSize = 20;
-var t = 0;
-var p;
-var nextPiece = Math.floor(Math.random() * 7);
+var pieceSize = 20, t = 0,
+    p = null, nextPiece = Math.floor(Math.random() * 7);
 
 for (var y = -5; y < 21; y++) {
     field[y] = new Array();
@@ -118,49 +95,35 @@ for (var i = 0; i < 10; i++)
 
 function collision() {
     /* Put the piece into the field. */
-    for (var i = 0; i < 4; i++) {
-	var x = p.x + p.b[i * 2];
-	var y = p.y + p.b[i * 2 + 1];
-	field[y][x] = p.col;
-    }
+    for (var i = 0; i < 4; i++)
+	field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] = p.col;
 
     var numCleared = 0;
 
     /* Check for full lines. */
     for (var y = 19; y >= 0; y--) {
 	var full = true;
-	for (var x = 0; x < 10; x++) {
-	    if (field[y][x] == null) {
-		full = false;
-		break;
-	    }
-	}
+	for (var x = 0; x < 10; x++)
+	    if (field[y][x] == null) full = false;
 	if (!full) continue;
-	numCleared++;
 	for (var Y = y; Y > -5; Y--) {
 	    field[Y] = field[Y - 1];
 	}
-	field[-5] = new Array();
+	field[-5] = [];
 	field[-5][-1] = '#afafaf';
 	field[-5][10] = '#afafaf';
-	y++;
+	numCleared++, y++;
     }
 
-    if (numCleared == 1) {
-	score += 40 * (level + 1);
-    } else if (numCleared == 2) {
-	score += 100 * (level + 1);
-    } else if (numCleared == 3) {
-	score += 300 * (level + 1);
-    } else if (numCleared == 4) {
-	score += 1200 * (level + 1);
+    switch (numCleared) {
+    case 1: score += 40 * (level + 1); break;
+    case 2: score += 100 * (level + 1); break;
+    case 3: score += 300 * (level + 1); break;
+    case 4: score += 1200 * (level + 1); break;
     }
 
-    if (lines % 10 > (lines + numCleared) % 10) {
-	level++;
-	if (level >= 20) level = 20;
-    }
-
+    if (lines % 10 > (lines + numCleared) % 10) level++;
+    if (level >= 20) level = 20;
     lines += numCleared;
 }
 
@@ -204,7 +167,6 @@ function render() {
 
 function draw () {
     if (t == 0 && !gameOver) {
-	console.log("hue");
 	p = new Piece(nextPiece);
 	nextPiece = Math.floor(Math.random() * 7);
 	preview = new Piece(nextPiece);
@@ -212,13 +174,8 @@ function draw () {
 	preview.y = 7.5;
     }
 
-    if (pPressed) paused = !paused, pPressed = false;
-    if (gameOver || paused) {
-	leftPressed = rightPressed = upPressed
-	    = downPressed = spacePressed = false;
-	render();
-	return;
-    }
+    if (keyDowns.includes(P)) paused = !paused;
+    if (gameOver || paused) return keyDowns = [], render();
     if (p.colliding()) gameOver = true;
 
     t++;
@@ -226,41 +183,27 @@ function draw () {
 
     /* Check for collisions with the field. */
     for (var i = 0; i < 4; i++) {
-	var x = p.x + p.b[i * 2];
-	var y = p.y + p.b[i * 2 + 1];
-
-	if (field[y][x] != null) {
-	    p.y--;
-	    collision();
-	    t = 0;
-	    render();
+	if (field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] != null) {
+	    p.y--, t = 0;
+	    collision(), render();
 	    return;
 	}
     }
 
-    if (spacePressed) {
+    /* Hard drop. */
+    if (keyDowns.includes(SPACE)) {
 	while (!p.colliding()) p.y++;
-	spacePressed = false;
-	p.y--;
-	collision();
-	render();
-	t = 0;
+	p.y--, t = 0, keyDowns = [];
+	collision(), render();
 	return;
     }
 
-    if (leftPressed)   p.x--;
-    if (p.colliding()) p.x++;
-    if (rightPressed)  p.x++;
-    if (p.colliding()) p.x--;
-    if (upPressed)     p.rotateRight();
-    if (p.colliding()) p.rotateLeft();
-    if (downPressed)   p.rotateLeft();
-    if (p.colliding()) p.rotateLeft();
+    if (keyDowns.includes(LEFT))  p.x--;           if (p.colliding()) p.x++;
+    if (keyDowns.includes(RIGHT)) p.x++;           if (p.colliding()) p.x--;
+    if (keyDowns.includes(UP))    p.rotateRight(); if (p.colliding()) p.rotateLeft();
+    if (keyDowns.includes(DOWN))  p.rotateLeft();  if (p.colliding()) p.rotateLeft();
 
-    leftPressed = rightPressed = upPressed
-	= downPressed = spacePressed = false;
-
-    render();
+    keyDowns = [], render();
 }
 
 setInterval(draw, 16);
