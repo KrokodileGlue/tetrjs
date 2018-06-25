@@ -114,8 +114,8 @@ function render() {
     ctx.fillText("Score: " + score.toLocaleString(), 30 * pieceSize, 7 * pieceSize);
     ctx.fillText("Level: " + level, 30 * pieceSize, 9 * pieceSize);
     ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
-    if (gameOver) ctx.fillText("Game over!", 30 * pieceSize, 18 * pieceSize);
-    if (paused)   ctx.fillText("Paused", 30 * pieceSize, 25.5 * pieceSize);
+    if (gameOver) ctx.fillText("Game over!", 20.4 * pieceSize, 27.5 * pieceSize);
+    if (paused && !gameOver) ctx.fillText("Paused", 21.75 * pieceSize, 27.5 * pieceSize);
 }
 
 function draw () {
