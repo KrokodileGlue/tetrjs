@@ -1,20 +1,15 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 document.addEventListener("keydown", keyDownHandler, false);
-
 var RIGHT = 39, LEFT = 37, UP = 38, DOWN = 40, SPACE = 32, P = 80;
-var keyDowns = [];
-
-var field = [], score = 0, level = 0, lines = 0;
+var keyDowns = [], field = [], score = 0, level = 0, lines = 0;
 var gameOver = false, paused = false;
-
-var levels = [53, 49, 45, 41, 37, 33, 28, 22, 17,
-	      11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3];
+var levels = [53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3];
+var pieceSize = 20, t = 0, p = null, nextPiece = Math.floor(Math.random() * 7);
 
 function keyDownHandler (e) {
     keyDowns.push(e.keyCode);
-    if (e.keyCode == UP || e.keyCode == DOWN
-	|| e.keyCode == LEFT || e.keyCode == RIGHT)
+    if (e.keyCode == UP || e.keyCode == DOWN || e.keyCode == LEFT || e.keyCode == RIGHT)
 	e.preventDefault();
 }
 
@@ -29,11 +24,9 @@ function Piece (type) {
 	     ][type].slice();
     this.col = ["#0095DD", "#1df99a", "#ffe502", "#ff011b",
 		"#97ff30", "#a500ff", "#ff006e"][type];
-    this.x = 4;
-    this.y = 1;
-    this.type = type;
+    this.x = 4; this.y = 1; this.type = type;
     this.rotateRight = function () {
-	if (this.type == 2) return;
+	if (this.type == 2) return; // Squares rotate weirdly.
 	for (var i = 0; i < 4; i++) {
 	    var temp = this.b[i * 2 + 1];
 	    this.b[i * 2 + 1] = this.b[i * 2];
@@ -62,8 +55,6 @@ function Piece (type) {
     }
 }
 
-var pieceSize = 20, t = 0;
-var p = null, nextPiece = Math.floor(Math.random() * 7);
 for (var y = -5; y < 21; y++)
     field[y] = [], field[y][-1] = '#afafaf', field[y][10] = '#afafaf';
 for (var i = 0; i < 10; i++)
@@ -107,20 +98,14 @@ function render() {
 	    if (field[i][j] == null) continue;
 	    ctx.beginPath();
 	    ctx.fillStyle = field[i][j];
-	    ctx.rect((19 + j) * pieceSize,
-		     (i + 6) * pieceSize,
-		     pieceSize,
-		     pieceSize);
+	    ctx.rect((19 + j) * pieceSize, (i + 6) * pieceSize, pieceSize, pieceSize);
 	    ctx.fill();
 	    ctx.closePath();
 	}
     }
 
     ctx.beginPath();
-    ctx.rect(19 * pieceSize,
-	     6 * pieceSize,
-	     10 * pieceSize,
-	     20 * pieceSize);
+    ctx.rect(19 * pieceSize, 6 * pieceSize, 10 * pieceSize, 20 * pieceSize);
     ctx.stroke();
     ctx.closePath();
 
