@@ -1,7 +1,7 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 document.addEventListener("keydown", keyDownHandler, false);
-var RIGHT = 39, LEFT = 37, UP = 38, DOWN = 40, SPACE = 32, P = 80;
+var RIGHT = 39, LEFT = 37, UP = 38, DOWN = 40, SPACE = 32, P = 80, R = 82;
 var keyDowns = [], field = [], score = 0, level = 0, lines = 0;
 var gameOver = false, paused = false;
 var levels = [53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3];
@@ -55,10 +55,13 @@ function Piece (type) {
     }
 }
 
-for (var y = -5; y < 21; y++)
-    field[y] = [], field[y][-1] = '#afafaf', field[y][10] = '#afafaf';
-for (var i = 0; i < 10; i++)
-    field[20][i] = '#afafaf';
+function init () {
+    field = [];
+    for (var y = -5; y < 21; y++)
+	field[y] = [], field[y][-1] = '#afafaf', field[y][10] = '#afafaf';
+    for (var i = 0; i < 10; i++)
+	field[20][i] = '#afafaf';
+}
 
 function collision() {
     var numCleared = 0;
@@ -125,6 +128,12 @@ function draw () {
 	preview = new Piece(nextPiece);
 	preview.x = 14, preview.y = 7.5;
     }
+    if (keyDowns.includes(R)) {
+	p = new Piece(Math.floor(Math.random() * 7));
+	nextPiece = Math.floor(Math.random() * 7);
+	t = 0, keyDowns = [], gameOver = false, paused = false, init();
+	return;
+    }
     if (keyDowns.includes(P)) paused = !paused;
     if (gameOver || paused) return keyDowns = [], render();
     if (p.colliding()) gameOver = true;
@@ -151,3 +160,4 @@ function draw () {
 }
 
 setInterval(draw, 16); /* About 60 times a second. */
+init();
