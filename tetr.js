@@ -30,7 +30,9 @@ function Piece (type) {
 	     ][type].slice();
     this.col = ["#0095DD", "#1df99a", "#ffe502", "#ff011b",
 		"#97ff30", "#a500ff", "#ff006e"][type];
-    this.x = 4; this.y = 1; this.type = type;
+    this.x = 13 + [0, -0.35, -0.5, 0.35, 0, 0, 0][type];
+    this.y = 1.5 + [0, 0.5, 0, 0.5, 0, 0, 0][type];
+    this.type = type;
     this.rotateRight = function () {
 	if (this.type == 2) return; // Squares rotate weirdly.
 	for (var i = 0; i < 4; i++) {
@@ -64,6 +66,15 @@ function Piece (type) {
 function play (s) {
     document.getElementById(s).play();
     document.getElementById(s).currentTime = 0;
+}
+
+function help () {
+    var offset = 12.5 * pieceSize;
+    ctx.fillText("Controls:", 30 * pieceSize, 20 * pieceSize);
+    ctx.fillText("m     - mute", 30 * pieceSize, offset + 9 * pieceSize);
+    ctx.fillText("p     - pause", 30 * pieceSize, offset + 10.5 * pieceSize);
+    ctx.fillText("r     - restart", 30 * pieceSize, offset + 12 * pieceSize);
+    ctx.fillText("space - hard drop", 30 * pieceSize, offset + 13.5 * pieceSize);
 }
 
 function init () {
@@ -110,6 +121,11 @@ function render () {
     p.draw();
     preview.draw();
 
+    ctx.beginPath();
+    ctx.rect(30 * pieceSize, 6 * pieceSize, 5 * pieceSize, 5 * pieceSize);
+    ctx.stroke();
+    ctx.closePath();
+
     for (var i = 0; i < 20; i++) {
 	for (var j = 0; j < 10; j++) {
 	    if (field[i][j] == null) continue;
@@ -128,24 +144,26 @@ function render () {
 
     ctx.fillStyle = "#000000";
     ctx.font = "30px Lekton";
-    ctx.fillText("Score: " + score.toLocaleString(), 30 * pieceSize, 7 * pieceSize);
-    ctx.fillText("Level: " + level, 30 * pieceSize, 9 * pieceSize);
-    ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
-    if (gameOver) ctx.fillText("Game over!", 20.4 * pieceSize, 27.5 * pieceSize);
-    if (paused) ctx.fillText("Paused", 21.75 * pieceSize, 27.5 * pieceSize);
+    ctx.fillText("Score: " + score.toLocaleString(), 30 * pieceSize, 13 * pieceSize);
+    ctx.fillText("Level: " + level, 30 * pieceSize, 15 * pieceSize);
+    ctx.fillText("Lines: " + lines, 30 * pieceSize, 17 * pieceSize);
+    if (gameOver) ctx.fillText("Game over!", 20.4 * pieceSize, 28 * pieceSize);
+    if (paused) ctx.fillText("Paused", 21.75 * pieceSize, 28 * pieceSize);
+    help();
 }
 
 function draw () {
     if (t == 0 && !gameOver) {
 	p = new Piece(nextPiece);
+	p.x = 4, p.y = 1;
 	nextPiece = Math.floor(Math.random() * 7);
 	preview = new Piece(nextPiece);
-	preview.x = 14, preview.y = 7.5;
     }
     if (keyDowns.includes(R)) {
 	play("music");
 	document.getElementById("score").pause();
 	p = new Piece(Math.floor(Math.random() * 7));
+	p.x = 4, p.y = 1;
 	nextPiece = Math.floor(Math.random() * 7);
 	t = 0, keyDowns = [], gameOver = false, paused = false, init();
 	return;
@@ -198,5 +216,4 @@ function draw () {
     keyDowns = [], render();
 }
 
-setInterval(draw, 16); /* About 60 times a second. */
-init();
+setInterval(draw, 16), init(); /* About 60 times a second. */

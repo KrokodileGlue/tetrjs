@@ -1,31 +1,35 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>tetr.js</title>
-		<link href="https://fonts.googleapis.com/css?family=Lekton" rel="stylesheet">
-		<style>
-		* { padding: 0; margin: 0; }
-		body { background-color: #f0f0f0; }
-		canvas {
-			background: #f0f0f0;
-			display: block;
-			margin: 0 auto;
-			border-width: 5px;
-		}
-		</style>
-	</head>
-	<body>
-		<center>
-			<canvas id="canvas" width="960" height="640">
-			</canvas>
-		</center>
-		<audio id="music" src="tetris.mp3" type="audio/mp3" autoplay loop></audio>
-		<audio id="piecemove" src="piecemove.wav" type="audio/wav"></audio>
-		<audio id="piecedrop" src="piecedrop.wav" type="audio/wav"></audio>
-		<audio id="rotate" src="rotate.wav" type="audio/wav"></audio>
-		<audio id="lineclear" src="lineclear.wav" type="audio/wav"></audio>
-		<audio id="score" src="score.mp3" type="audio/mp3" loop></audio>
-		<script src="tetr.js"></script>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>tetr.js</title>
+    <link href="https://fonts.googleapis.com/css?family=Lekton" rel="stylesheet">
+    <style>
+      * { padding: 0; margin: 0; }
+      body { background-color: #f0f0f0; }
+      canvas {
+      background: #f0f0f0;
+      display: block;
+      margin: 0 auto;
+      border-width: 5px;
+      <!-- border-style: solid; -->
+      }
+    </style>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+  </head>
+  <body>
+    <center>
+      <canvas id="canvas" width="960" height="640">
+      </canvas>
+    </center>
+    <audio id="music" src="tetris.mp3" type="audio/mp3" autoplay loop></audio>
+    <audio id="piecemove" src="piecemove.wav" type="audio/wav"></audio>
+    <audio id="piecedrop" src="piecedrop.wav" type="audio/wav"></audio>
+    <audio id="rotate" src="rotate.wav" type="audio/wav"></audio>
+    <audio id="lineclear" src="lineclear.wav" type="audio/wav"></audio>
+    <audio id="score" src="score.mp3" type="audio/mp3" loop></audio>
+    <script src="tetr.js"></script>
+  </body>
 </html>
