@@ -48,6 +48,7 @@ function Piece (type) {
 	ctx.beginPath();
 	ctx.fillStyle = this.col;
 	for (var i = 0; i < 4; i++) {
+	    if (this.y + this.b[i * 2 + 1] < 0) continue;
 	    ctx.rect((this.x + this.b[i * 2] + 19) * pieceSize,
 		     (this.y + this.b[i * 2 + 1] + 6) * pieceSize,
 		     pieceSize,
