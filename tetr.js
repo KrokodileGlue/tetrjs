@@ -1,11 +1,17 @@
 var canvas = document.getElementById("canvas");
 var ctx = canvas.getContext("2d");
 document.addEventListener("keydown", keyDownHandler, false);
-var RIGHT = 39, LEFT = 37, UP = 38, DOWN = 40, SPACE = 32, P = 80, R = 82;
+var RIGHT = 39, LEFT = 37, UP = 38, DOWN = 40, SPACE = 32, P = 80, R = 82, M = 77;
 var keyDowns = [], field = [], score = 0, level = 0, lines = 0;
 var gameOver = false, paused = false;
 var levels = [53, 49, 45, 41, 37, 33, 28, 22, 17, 11, 10, 9, 8, 7, 6, 6, 5, 5, 4, 4, 3];
 var pieceSize = 20, t = 0, p = null, nextPiece = Math.floor(Math.random() * 7);
+var sounds = ["music", "piecedrop", "piecemove", "rotate", "lineclear", "score"];
+
+document.getElementById("piecedrop").volume = 0.5;
+document.getElementById("piecemove").volume = 0.3;
+document.getElementById("rotate").volume = 0.5;
+document.getElementById("lineclear").volume = 0.5;
 
 function keyDownHandler (e) {
     keyDowns.push(e.keyCode);
@@ -55,6 +61,11 @@ function Piece (type) {
     }
 }
 
+function play (s) {
+    document.getElementById(s).play();
+    document.getElementById(s).currentTime = 0;
+}
+
 function init () {
     score = level = lines = 0;
     field = [];
@@ -65,6 +76,7 @@ function init () {
 }
 
 function collision() {
+    play("piecedrop");
     var numCleared = 0;
     for (var i = 0; i < 4; i++)
 	field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] = p.col;
@@ -90,9 +102,10 @@ function collision() {
     if (lines % 10 > (lines + numCleared) % 10) level++;
     if (level >= 20) level = 20;
     lines += numCleared;
+    if (numCleared > 0) play("lineclear");
 }
 
-function render() {
+function render () {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     p.draw();
     preview.draw();
@@ -119,7 +132,7 @@ function render() {
     ctx.fillText("Level: " + level, 30 * pieceSize, 9 * pieceSize);
     ctx.fillText("Lines: " + lines, 30 * pieceSize, 11 * pieceSize);
     if (gameOver) ctx.fillText("Game over!", 20.4 * pieceSize, 27.5 * pieceSize);
-    if (paused && !gameOver) ctx.fillText("Paused", 21.75 * pieceSize, 27.5 * pieceSize);
+    if (paused) ctx.fillText("Paused", 21.75 * pieceSize, 27.5 * pieceSize);
 }
 
 function draw () {
@@ -130,33 +143,58 @@ function draw () {
 	preview.x = 14, preview.y = 7.5;
     }
     if (keyDowns.includes(R)) {
+	play("music");
+	document.getElementById("score").pause();
 	p = new Piece(Math.floor(Math.random() * 7));
 	nextPiece = Math.floor(Math.random() * 7);
 	t = 0, keyDowns = [], gameOver = false, paused = false, init();
 	return;
     }
-    if (keyDowns.includes(P)) paused = !paused;
+    if (keyDowns.includes(P) && !gameOver) {
+	paused = !paused;
+	if (paused) sounds.forEach(function (s) { document.getElementById(s).pause() });
+	else document.getElementById("music").play();
+    }
+    if (keyDowns.includes(M))
+	sounds.forEach(function (s) {
+	    document.getElementById(s).muted = !document.getElementById(s).muted;
+	});
+    if (gameOver) paused = false;
     if (gameOver || paused) return keyDowns = [], render();
-    if (p.colliding()) gameOver = true;
+    if (p.colliding()) gameOver = true, document.getElementById("music").pause(), play("score");
     t++;
     if (t % levels[level] == 0) p.y++;
-    for (var i = 0; i < 4; i++) {
-	if (field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] != null) {
-	    p.y--, t = 0;
-	    collision(), render();
-	    return;
-	}
-    }
+    for (var i = 0; i < 4; i++)
+	if (field[p.y + p.b[i * 2 + 1]][p.x + p.b[i * 2]] != null)
+	    return p.y--, t = 0, collision(), render();
     if (keyDowns.includes(SPACE)) {
 	while (!p.colliding()) p.y++;
 	p.y--, t = 0, keyDowns = [];
 	collision(), render();
 	return;
     }
-    if (keyDowns.includes(LEFT))  p.x--;           if (p.colliding()) p.x++;
-    if (keyDowns.includes(RIGHT)) p.x++;           if (p.colliding()) p.x--;
-    if (keyDowns.includes(UP))    p.rotateRight(); if (p.colliding()) p.rotateLeft();
-    if (keyDowns.includes(DOWN))  p.rotateLeft();  if (p.colliding()) p.rotateRight();
+    if (keyDowns.includes(LEFT)) {
+	p.x--;
+	if (p.colliding()) p.x++;
+	else play("piecemove");
+    }
+    if (keyDowns.includes(RIGHT)) {
+	p.x++;
+	if (p.colliding()) p.x--;
+	else play("piecemove");
+    }
+    if (keyDowns.includes(UP)) {
+	p.rotateRight();
+	if (p.colliding())
+	    p.rotateLeft();
+	else play("rotate");
+    }
+    if (keyDowns.includes(DOWN)) {
+	p.rotateLeft();
+	if (p.colliding())
+	    p.rotateRight();
+	else play("rotate");
+    }
     keyDowns = [], render();
 }
 
